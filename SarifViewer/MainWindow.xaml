@@ -7,12 +7,53 @@
         xmlns:models="clr-namespace:SarifViewer.Models"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        Title="Sonar-DotNet IT Report Viewer" Height="450" Width="800">
+        WindowState="Maximized"
+        Title="Sonar-DotNet IT Report Viewer" Height="800" Width="800">
     <Window.DataContext>
         <local:MainWindowViewModel />
     </Window.DataContext>
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <Style TargetType="TextBlock" x:Key="StaticLabelStyle">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style TargetType="TextBox" x:Key="FilterTextBoxStyle">
+            <Setter Property="Margin" Value="0,1" />
+            <Setter Property="Padding" Value="3" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style TargetType="Button" x:Key="FilterButtonBoxStyle">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Padding" Value="3" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style TargetType="{x:Type Panel}" x:Key="FilterPanelStyle">
+            <Setter Property="Background" Value="LightGray" />
+        </Style>
+
+        <Style TargetType="ListView" x:Key="IssueListViewStyle">
+            <Setter Property="AlternationCount" Value="2" />
+            <Setter Property="FontSize" Value="16" />
+        </Style>
+
+        <Style TargetType="ListViewItem">
+            <Style.Triggers>
+                <Trigger Property="ItemsControl.AlternationIndex"  Value="0">
+                    <Setter Property="Background" Value="GhostWhite" />
+                </Trigger>
+                <Trigger Property="ItemsControl.AlternationIndex"  Value="1">
+                    <Setter Property="Background" Value="White" />
+                </Trigger>
+            </Style.Triggers>
+            <Setter Property="Padding" Value="8" />
+        </Style>
     </Window.Resources>
 
     <i:Interaction.Triggers>
@@ -52,8 +93,12 @@
 
         </Grid>
 
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0" Style="{StaticResource FilterPanelStyle}">
             <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
             </Grid.RowDefinitions>
@@ -65,28 +110,74 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0"
+                       Style="{StaticResource StaticLabelStyle}"
                        Text="Repository Folder:" />
             <TextBox Grid.Row="0" Grid.Column="1"
+                     Style="{StaticResource FilterTextBoxStyle}"
                      IsReadOnly="True"
                      Text="{Binding Settings.RepositoryFolderPath}" />
             <Button Grid.Row="0" Grid.Column="2"
+                    Style="{StaticResource FilterButtonBoxStyle}"
                     Content="Select Folder"
                     Command="{Binding SelectRepositoryFolderCommand}" />
 
             <TextBlock Grid.Row="1" Grid.Column="0"
+                       Style="{StaticResource StaticLabelStyle}"
                        Text="Rule ID:" />
             <TextBox Grid.Row="1" Grid.Column="1"
+                     Style="{StaticResource FilterTextBoxStyle}"
                      Text="{Binding Settings.Filter.IssueId, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <TextBlock Grid.Row="2" Grid.Column="0"
+                       Style="{StaticResource StaticLabelStyle}"
+                       Text="Source File Path:" />
+            <TextBox Grid.Row="2" Grid.Column="1"
+                     Style="{StaticResource FilterTextBoxStyle}"
+                     Text="{Binding Settings.Filter.SourceFilePath, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0"
+                       Style="{StaticResource StaticLabelStyle}"
+                       Text="Issue Message:" />
+            <TextBox Grid.Row="3" Grid.Column="1"
+                     Style="{StaticResource FilterTextBoxStyle}"
+                     Text="{Binding Settings.Filter.IssueMessage, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <TextBlock Grid.Row="4" Grid.Column="0"
+                       Style="{StaticResource StaticLabelStyle}"
+                       Text="Language:" />
+            <ComboBox Grid.Row="4" Grid.Column="1"
+                      d:SelectedIndex="0"
+                      ItemsSource="{Binding IssueLanguageOptions, Mode=OneTime}"
+                      SelectedValue="{Binding Settings.Filter.IssueLanguage}"
+                      SelectedValuePath="Value"
+                      DisplayMemberPath="DisplayName" />
+
+            <TextBlock Grid.Row="5" Grid.Column="0"
+                       Style="{StaticResource StaticLabelStyle}"
+                       Text="Issue State:" />
+            <ComboBox Grid.Row="5" Grid.Column="1"
+                      SelectedIndex="0"
+                      ItemsSource="{Binding IssueTypeOptions}"
+                      SelectedValue="{Binding Settings.Filter.IssueState}"
+                      SelectedValuePath="Value"
+                      DisplayMemberPath="DisplayName" />
         </Grid>
 
         <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition  />
+            </Grid.RowDefinitions>
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0" Background="AliceBlue">
-                <ListView x:Name="IssueList" ItemsSource="{Binding NewIssues}">
+            <Grid Grid.Column="0" Grid.Row="1" Background="AliceBlue">
+                <ListView x:Name="IssueList"
+                          Style="{StaticResource IssueListViewStyle}"
+                          ItemsSource="{Binding FilteredIssues}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
                             <i:InvokeCommandAction Command="{Binding SelectedIssueCommand}"
@@ -97,32 +188,34 @@
                         <x:Array Type="models:Issue">
                             <models:Issue Id="S1234" Message="Refactor method 'abc' to have no parameters." />
                             <models:Issue Id="S1234" Message="Refactor method 'abc' to have no parameters." />
+                            <models:Issue Id="S1234" Message="Refactor method 'abc' to have no parameters." />
+                            <models:Issue Id="S1234" Message="Refactor method 'abc' to have no parameters." />
+                            <models:Issue Id="S1234" Message="Refactor method 'abc' to have no parameters." />
+                            <models:Issue Id="S1234" Message="Refactor method 'abc' to have no parameters." />
+                            <models:Issue Id="S1234" Message="Refactor method 'abc' to have no parameters." />
                         </x:Array>
                     </d:ListView.ItemsSource>
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <StackPanel>
-                                <TextBlock Text="{Binding Id}" />
-                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
-                                <TextBlock Text="{Binding FirstLocationUri}" TextWrapping="Wrap" />
+                                <StackPanel Orientation="Horizontal" Margin="0,5">
+                                    <TextBlock Text="{Binding Id}" FontWeight="Bold" />
+                                    <TextBlock Text=":" Margin="0,0,5,0" />
+                                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding FirstLocationUriAndLineNumber}" TextWrapping="Wrap" />
                             </StackPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
             </Grid>
 
-            <GridSplitter Grid.Column="1"
-              HorizontalAlignment="Left"
-              VerticalAlignment="Stretch"
-              Background="DarkGray"
-              ShowsPreview="true"
-              Width="5"/>
-
             <TextBox x:Name="SourceCodeTextBox"
                      Margin="5,0,0,0"
-                     Grid.Column="1"
+                     Grid.Column="1" Grid.Row="1"
                      Text="{Binding SourceCode}"
-                     FontFamily="Courier New"
+                     FontFamily="Courier New" FontSize="18"
                      IsReadOnly="True"
                      IsInactiveSelectionHighlightEnabled="True"
                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -153,6 +246,13 @@ namespace AutoMapper.Internal.Mappers
 }
                 </d:TextBox.Text>
             </TextBox>
+
+            <GridSplitter Grid.Column="1" Grid.Row="1"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Stretch"
+              Background="DarkGray"
+              ShowsPreview="true"
+              Width="5"/>
         </Grid>
     </Grid>
 </Window>

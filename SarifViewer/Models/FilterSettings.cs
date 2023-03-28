@@ -11,11 +11,11 @@ public class FilterSettings : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref issueId, value);
     }
 
-    private string filePath = "";
-    public string FilePath
+    private string sourceFilePath = "";
+    public string SourceFilePath
     {
-        get => filePath;
-        set => this.RaiseAndSetIfChanged(ref filePath, value);
+        get => sourceFilePath;
+        set => this.RaiseAndSetIfChanged(ref sourceFilePath, value);
     }
 
     private string issueMessage = "";
@@ -25,10 +25,17 @@ public class FilterSettings : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref issueMessage, value);
     }
 
-    private IssueType issueType;
-    public IssueType IssueType
+    private IssueState issueState;
+    public IssueState IssueState
     {
-        get => issueType;
-        set => this.RaiseAndSetIfChanged(ref issueType, value);
+        get => issueState;
+        set => this.RaiseAndSetIfChanged(ref issueState, value);
+    }
+
+    private IssueLanguage issueLanguage;
+    public IssueLanguage IssueLanguage
+    {
+        get => issueLanguage;
+        set => this.RaiseAndSetIfChanged(ref issueLanguage, value);
     }
 }

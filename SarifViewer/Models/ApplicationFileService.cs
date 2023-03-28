@@ -8,12 +8,15 @@ using System.Threading.Tasks;
 
 namespace SarifViewer.Models;
 
-public class ApplicationSettingsFileService
+public static class ApplicationFileService
 {
     public const string ExpectedIssuesFolder = @"analyzers\its\expected";
     public const string ActualIssuesFolder = @"analyzers\its\actual";
     public const string SourceCodeFolder = @"analyzers\its\sources";
     public const string IntegrationTestFolder = @"analyzers\its";
+
+    public static bool ActualTestResultFolderExists(string repositoryPath) =>
+        Directory.Exists(Path.Combine(repositoryPath, ActualIssuesFolder));
 
     public static async Task<string> ReadSourceCodeFromFile(string repositoryPath, string relativeSourcePath)
     {
@@ -48,7 +51,6 @@ public class ApplicationSettingsFileService
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true,
-                PropertyNameCaseInsensitive = false,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
             };
@@ -74,7 +76,7 @@ public class ApplicationSettingsFileService
             string jsonString = await File.ReadAllTextAsync(filePath);
             var options = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = false,
+                PropertyNameCaseInsensitive = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
             var settings = JsonSerializer.Deserialize<ApplicationSettings>(jsonString, options);

@@ -58,7 +58,19 @@ public class Issue: IEquatable<Issue>
     public string JsonFilePath { get; set; }
 
     public string FirstLocationUri =>
-        Location?.FirstOrDefault()?.Uri ?? "";
+        Location?.FirstOrDefault()?.Uri ?? "No location (project level issue)";
+
+    public string FirstLocationUriAndLineNumber
+    {
+        get
+        {
+            var firstLoc = Location?.FirstOrDefault();
+            var startLine = firstLoc?.Region?.StartLine;
+            return (firstLoc == null || startLine == 0)
+                ? "No location (project level issue)"
+                : $"{firstLoc.Uri} (Line {startLine})";
+        }
+    }
 
     public string FirstLocationAsString()
     {

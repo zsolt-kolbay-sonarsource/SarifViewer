@@ -53,5 +53,5 @@ public static class IssueReader
         return allIssues;
     }
 
-    private record IssueData(List<Issue> Issues);
+    private sealed record IssueData(List<Issue> Issues);
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Web;
 
 namespace SarifViewer.Models;
 
@@ -40,6 +41,14 @@ public class IssueJsonConverter : JsonConverter<Issue>
                     {
                         Location singleLocation = JsonSerializer.Deserialize<Location>(ref reader, options);
                         locations.Add(singleLocation);
+                    }
+
+                    foreach (Location loc in locations)
+                    {
+                        if (loc != null)
+                        {
+                            loc.Uri = loc.Uri == null ? null : HttpUtility.UrlDecode(loc.Uri);
+                        }
                     }
                 }
                 else if (propertyName == "message")
