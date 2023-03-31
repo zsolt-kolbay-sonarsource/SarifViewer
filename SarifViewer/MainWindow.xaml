@@ -14,57 +14,6 @@
     </Window.DataContext>
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-
-        <Style TargetType="TextBlock" x:Key="StaticLabelStyle">
-            <Setter Property="Margin" Value="5" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="FontWeight" Value="Bold" />
-        </Style>
-
-        <Style TargetType="TextBox" x:Key="FilterTextBoxStyle">
-            <Setter Property="Margin" Value="0,1" />
-            <Setter Property="Padding" Value="3" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style TargetType="Button" x:Key="FilterButtonBoxStyle">
-            <Setter Property="Margin" Value="5" />
-            <Setter Property="Padding" Value="3" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style TargetType="{x:Type Panel}" x:Key="FilterPanelStyle">
-            <Style.Resources>
-
-            </Style.Resources>
-
-            <Setter Property="Background" Value="LightGray" />
-        </Style>
-
-        <Style TargetType="ListView" x:Key="IssueListViewStyle">
-            <Setter Property="ItemContainerStyle">
-                <Setter.Value>
-                    <Style TargetType="{x:Type ListViewItem}">
-                        <Style.Triggers>
-                            <Trigger Property="ItemsControl.AlternationIndex"  Value="0">
-                                <Setter Property="Background" Value="GhostWhite" />
-                            </Trigger>
-                            <Trigger Property="ItemsControl.AlternationIndex"  Value="1">
-                                <Setter Property="Background" Value="White" />
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="true" >
-                                <Setter Property="Background" Value="Brown" />
-                            </Trigger>
-                        </Style.Triggers>
-
-                        <Setter Property="Padding" Value="8" />
-                    </Style>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="AlternationCount" Value="2" />
-            <Setter Property="FontSize" Value="16" />
-        </Style>
     </Window.Resources>
 
     <i:Interaction.Triggers>
@@ -86,14 +35,7 @@
               Panel.ZIndex="1000"
               Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
 
-            <Rectangle Opacity="0.5">
-                <Rectangle.Fill>
-                    <RadialGradientBrush>
-                        <GradientStop Color="Black" Offset="0" />
-                        <GradientStop Color="Gray" Offset="1" />
-                    </RadialGradientBrush>
-                </Rectangle.Fill>
-            </Rectangle>
+            <Rectangle Opacity="0.5" Fill="{StaticResource LoadingScreenBackgroundBrush}" />
 
             <Border BorderThickness="2" BorderBrush="White"
                     Background="White"
@@ -259,11 +201,8 @@ namespace AutoMapper.Internal.Mappers
             </TextBox>
 
             <GridSplitter Grid.Column="1" Grid.Row="1"
-              HorizontalAlignment="Left"
-              VerticalAlignment="Stretch"
-              Background="DarkGray"
-              ShowsPreview="true"
-              Width="5"/>
+              Style="{StaticResource VerticalGridSplitterStyle}"
+              ShowsPreview="True" />
         </Grid>
     </Grid>
 </Window>
