@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -31,12 +32,22 @@ public static class IssueReader
         string sanatizedContent = FixUnescapedQuotesInMessageNode(jsonData.Replace("\\", "\\\\"));
 
         var options = new JsonSerializerOptions { Converters = { new IssueJsonConverter() }, PropertyNameCaseInsensitive = true };
-        var issues = JsonSerializer.Deserialize<IssueData>(sanatizedContent, options).Issues;
-
+        var loadedIssues = JsonSerializer.Deserialize<IssueData>(sanatizedContent, options).Issues;
         string relativePath = Path.GetRelativePath(rootFolderPath, filePath);
-        issues.ForEach(issue => issue.JsonFilePath = relativePath);
+        var issues = RemoveTempPathsAndAddJsonPath(loadedIssues, relativePath);
 
         return issues;
+    }
+
+    private static List<Issue> RemoveTempPathsAndAddJsonPath(List<Issue> issues, string jsonFilePath)
+    {
+        issues.ForEach(issue => issue.JsonFilePath = jsonFilePath);
+        return issues
+            .Where(issue =>
+                issue.Location == null ||
+                !issue.Location.Any(loc => loc != null
+                                           && loc.Uri.StartsWith("Replaced-Temporary-Path\\")))
+            .ToList();
     }
 
     public static async Task<List<Issue>> ReadFromFolder(string folderPath)
