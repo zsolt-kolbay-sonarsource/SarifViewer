@@ -29,11 +29,25 @@ public class MainWindowViewModel : ReactiveObject
         new ValueWithDisplayName<IssueState> { DisplayName = "New", Value = IssueState.New }
     };
 
-    private string sourceCode = "";
-    public string SourceCode
+    private string sourceCodePath = "";
+    public string SourceCodePath
     {
-        get => sourceCode;
-        set => this.RaiseAndSetIfChanged(ref sourceCode, value);
+        get => sourceCodePath;
+        set => this.RaiseAndSetIfChanged(ref sourceCodePath, value);
+    }
+
+    private Issue currentIssue;
+    public Issue CurrentIssue
+    {
+        get => currentIssue;
+        set
+        {
+            if (!ReferenceEquals(currentIssue, value))
+            {
+                currentIssue = value;
+                this.RaisePropertyChanged(nameof(CurrentIssue));
+            }
+        }
     }
 
     private bool isLoading;
@@ -92,8 +106,6 @@ public class MainWindowViewModel : ReactiveObject
         new ValueWithDisplayName<IssueLanguage> { DisplayName = "Only Visual Basic", Value = IssueLanguage.VisualBasic }
     };
 
-    public Action<Location> ScrollToLocation { get; set; }
-
     public ICommand ApplicationLoadedCommand => ReactiveCommand.CreateFromTask(async () =>
     {
         Settings = await ApplicationFileService.LoadFromFileAsync(applicationSettingsFilePath);
@@ -117,20 +129,18 @@ public class MainWindowViewModel : ReactiveObject
         }
     });
 
-    public ICommand SelectedIssueCommand => ReactiveCommand.CreateFromTask<Issue>(async issue =>
+    public ICommand SelectedIssueCommand => ReactiveCommand.Create<Issue>(issue =>
     {
         if (issue != null && issue.Location?.FirstOrDefault() is { Uri: not null } firstLocation)
         {
-            try
-            {
-                SourceCode = await ApplicationFileService.ReadSourceCodeFromFile(Settings.RepositoryFolderPath, firstLocation.Uri);
-                ScrollToLocation(firstLocation);
-            }
-            catch (Exception ex)
-            {
-                ShowError($"Failed to load source file '{issue.FirstLocationUri}'" + Environment.NewLine + ex.Message);
-            }
+            SourceCodePath = ApplicationFileService.SourceCodePath(Settings.RepositoryFolderPath, firstLocation.Uri);
         }
+        else
+        {
+            SourceCodePath = "";
+        }
+
+        CurrentIssue = issue;
     });
 
     private readonly ObservableAsPropertyHelper<IEnumerable<Issue>> filteredIssues;

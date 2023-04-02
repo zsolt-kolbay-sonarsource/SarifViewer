@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SarifViewer"
         xmlns:models="clr-namespace:SarifViewer.Models"
+        xmlns:views="clr-namespace:SarifViewer.Views"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         WindowState="Maximized"
@@ -71,8 +72,16 @@
                      Text="{Binding Settings.RepositoryFolderPath}" />
             <Button Grid.Row="0" Grid.Column="2"
                     Style="{StaticResource FilterButtonBoxStyle}"
-                    Content="Select Folder"
-                    Command="{Binding SelectRepositoryFolderCommand}" />
+                    Command="{Binding SelectRepositoryFolderCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="SelectFolderButtonText"
+                               Text="Select Folder"
+                               VerticalAlignment="Center" />
+                    <Image Source="pack://application:,,,/SarifViewer;component/Resources/folder-icon.png"
+                           Height="{Binding ElementName=SelectFolderButtonText, Path=ActualHeight, FallbackValue=16}"
+                           Margin="5,0" />
+                </StackPanel>
+            </Button>
 
             <TextBlock Grid.Row="1" Grid.Column="0"
                        Style="{StaticResource StaticLabelStyle}"
@@ -164,45 +173,15 @@
                 </ListView>
             </Grid>
 
-            <TextBox x:Name="SourceCodeTextBox"
-                     Margin="5,0,0,0"
-                     Grid.Column="1" Grid.Row="1"
-                     Text="{Binding SourceCode}"
-                     FontFamily="Courier New" FontSize="18"
-                     IsReadOnly="True"
-                     IsInactiveSelectionHighlightEnabled="True"
-                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     SelectionBrush="OrangeRed">
-                <TextBox.Resources>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
-                         Color="OrangeRed"/>
-                </TextBox.Resources>
-                <d:TextBox.Text xml:space="preserve">using System;
-using System.Linq.Expressions;
-
-namespace AutoMapper.Internal.Mappers
-{
-    using static Expression;
-    public class ConvertMapper : IObjectMapper
-    {
-        public static bool IsPrimitive(Type type) =&gt; type.IsPrimitive || type == typeof(string) || type == typeof(decimal);
-        public bool IsMatch(in TypePair types) =&gt; (types.SourceType == typeof(string) &amp;&amp; types.DestinationType == typeof(DateTime)) ||
-            (IsPrimitive(types.SourceType) &amp;&amp; IsPrimitive(types.DestinationType));
-        public Expression MapExpression(IGlobalConfiguration configurationProvider, ProfileMap profileMap,
-            MemberMap memberMap, Expression sourceExpression, Expression destExpression)
-        {
-            var convertMethod = typeof(Convert).GetMethod(&quot;To&quot; + destExpression.Type.Name, new[] { sourceExpression.Type });
-            return Call(convertMethod, sourceExpression);
-        }
-    }
-}
-                </d:TextBox.Text>
-            </TextBox>
+            <views:SourceCodeEditor x:Name="SourceCodeTextBox"
+                                    Style="{StaticResource SourceCodeEditorStyle}"
+                                    Grid.Column="1" Grid.Row="1"
+                                    SourceCodePath="{Binding SourceCodePath}"
+                                    SelectedIssue="{Binding CurrentIssue}"/>
 
             <GridSplitter Grid.Column="1" Grid.Row="1"
-              Style="{StaticResource VerticalGridSplitterStyle}"
-              ShowsPreview="True" />
+                          Style="{StaticResource VerticalGridSplitterStyle}"
+                          ShowsPreview="True" />
         </Grid>
     </Grid>
 </Window>

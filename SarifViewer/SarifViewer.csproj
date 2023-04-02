@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\folder-icon.png" />
+    <None Remove="Resources\git-branch-icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Resources\file_type_diff_icon.ico" />
   </ItemGroup>
 
@@ -16,6 +21,11 @@
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="ReactiveUI.WPF" Version="18.4.26" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\folder-icon.png" />
+    <Resource Include="Resources\git-branch-icon.png" />
   </ItemGroup>
 
 </Project>

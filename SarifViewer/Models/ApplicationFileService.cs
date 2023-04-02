@@ -17,11 +17,8 @@ public static class ApplicationFileService
     public static bool ActualTestResultFolderExists(string repositoryPath) =>
         Directory.Exists(Path.Combine(repositoryPath, ActualIssuesFolder));
 
-    public static async Task<string> ReadSourceCodeFromFile(string repositoryPath, string relativeSourcePath)
-    {
-        string fullPath = Path.Combine(repositoryPath, IntegrationTestFolder, relativeSourcePath);
-        return await File.ReadAllTextAsync(fullPath);
-    }
+    public static string SourceCodePath(string repositoryPath, string relativeSourcePath)
+        => Path.Combine(repositoryPath, IntegrationTestFolder, relativeSourcePath);
 
     public static void ValidateRepositoryFolder(string folderPath)
     {
