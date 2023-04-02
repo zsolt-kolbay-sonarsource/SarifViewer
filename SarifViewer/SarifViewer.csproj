@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Remove="Resources\folder-icon.png" />
     <None Remove="Resources\git-branch-icon.png" />
+    <None Remove="Resources\visual-studio-icon.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +27,7 @@
   <ItemGroup>
     <Resource Include="Resources\folder-icon.png" />
     <Resource Include="Resources\git-branch-icon.png" />
+    <Resource Include="Resources\visual-studio-icon.png" />
   </ItemGroup>
 
 </Project>

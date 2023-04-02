@@ -129,6 +129,11 @@ public class MainWindowViewModel : ReactiveObject
         }
     });
 
+    public ICommand OpenFileInVisualStudioCommand => ReactiveCommand.Create<string>(fullFilePath =>
+    {
+
+    });
+
     public ICommand SelectedIssueCommand => ReactiveCommand.Create<Issue>(issue =>
     {
         if (issue != null && issue.Location?.FirstOrDefault() is { Uri: not null } firstLocation)

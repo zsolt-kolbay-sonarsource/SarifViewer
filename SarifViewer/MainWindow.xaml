@@ -173,11 +173,45 @@
                 </ListView>
             </Grid>
 
-            <views:SourceCodeEditor x:Name="SourceCodeTextBox"
+            <Grid Grid.Column="1" Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="5,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding SourceCodePath}"
+                               d:Text="sources\akka.net\src\contrib\cluster\Akka.Cluster.Metrics\ClusterMetricsStrategy.cs"
+                               VerticalAlignment="Center" />
+
+                    <Button Grid.Column="1"
+                            Style="{StaticResource FilterButtonBoxStyle}"
+                            Command="{Binding OpenFileInVisualStudioCommand}"
+                            CommandParameter="{Binding SourceCodePath}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock x:Name="OpenInVisualStudioButtonText"
+                                    Text="Open"
+                                    VerticalAlignment="Center" />
+                                <Image Source="pack://application:,,,/SarifViewer;component/Resources/visual-studio-icon.png"
+                                Height="{Binding ElementName=OpenInVisualStudioButtonText, Path=ActualHeight, FallbackValue=16}"
+                                Margin="5,0" />
+                            </StackPanel>
+                    </Button>
+                </Grid>
+
+                <views:SourceCodeEditor x:Name="SourceCodeTextBox"
                                     Style="{StaticResource SourceCodeEditorStyle}"
-                                    Grid.Column="1" Grid.Row="1"
+                                    Grid.Row="1"
                                     SourceCodePath="{Binding SourceCodePath}"
                                     SelectedIssue="{Binding CurrentIssue}"/>
+            </Grid>
+
 
             <GridSplitter Grid.Column="1" Grid.Row="1"
                           Style="{StaticResource VerticalGridSplitterStyle}"
