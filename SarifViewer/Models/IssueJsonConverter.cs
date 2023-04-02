@@ -16,7 +16,7 @@ public class IssueJsonConverter : JsonConverter<Issue>
         }
 
         string id = null;
-        List<Location> locations = new List<Location>();
+        var locations = new List<Location>();
         string message = null;
 
         while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)

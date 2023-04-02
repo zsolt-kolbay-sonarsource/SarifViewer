@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace SarifViewer.Models;
@@ -51,8 +50,11 @@ public static class ApplicationFileService
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+                Converters =
+                {
+                    new SkipBaseClassPropertiesJsonConverter<ApplicationSettings>(),
+                    new SkipBaseClassPropertiesJsonConverter<FilterSettings>()
+                }
             };
             string jsonString = JsonSerializer.Serialize(settings, options);
             await File.WriteAllTextAsync(filePath, jsonString);
@@ -76,8 +78,7 @@ public static class ApplicationFileService
             string jsonString = await File.ReadAllTextAsync(filePath);
             var options = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                PropertyNameCaseInsensitive = true
             };
             var settings = JsonSerializer.Deserialize<ApplicationSettings>(jsonString, options);
             return settings;
