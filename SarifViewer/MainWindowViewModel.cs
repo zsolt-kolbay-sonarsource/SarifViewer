@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using SarifViewer.Models;
+using SarifViewer.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,11 +30,18 @@ public class MainWindowViewModel : ReactiveObject
         new ValueWithDisplayName<IssueState> { DisplayName = "New", Value = IssueState.New }
     };
 
-    private string sourceCodePath = "";
-    public string SourceCodePath
+    private string sourceCodeFullPath = "";
+    public string SourceCodeFullPath
     {
-        get => sourceCodePath;
-        set => this.RaiseAndSetIfChanged(ref sourceCodePath, value);
+        get => sourceCodeFullPath;
+        set => this.RaiseAndSetIfChanged(ref sourceCodeFullPath, value);
+    }
+
+    private string sourceCodeRelativePath = "";
+    public string SourceCodeRelativePath
+    {
+        get => sourceCodeRelativePath;
+        set => this.RaiseAndSetIfChanged(ref sourceCodeRelativePath, value);
     }
 
     private Issue currentIssue;
@@ -129,20 +137,26 @@ public class MainWindowViewModel : ReactiveObject
         }
     });
 
-    public ICommand OpenFileInVisualStudioCommand => ReactiveCommand.Create<string>(fullFilePath =>
+    public ICommand OpenFileInVisualStudioCommand => ReactiveCommand.Create<Issue>(issue =>
     {
-
+        if (issue != null && issue.Location?.FirstOrDefault() is { Uri: not null } firstLocation)
+        {
+            string fullPath = SourceCodeFullPath = ApplicationFileService.SourceCodePath(Settings.RepositoryFolderPath, firstLocation.Uri);
+            SolutionFileHelper.OpenSourceCodeInVisualStudio(fullPath, firstLocation.Region.StartLine);
+        }
     });
 
     public ICommand SelectedIssueCommand => ReactiveCommand.Create<Issue>(issue =>
     {
         if (issue != null && issue.Location?.FirstOrDefault() is { Uri: not null } firstLocation)
         {
-            SourceCodePath = ApplicationFileService.SourceCodePath(Settings.RepositoryFolderPath, firstLocation.Uri);
+            SourceCodeRelativePath = firstLocation.Uri;
+            SourceCodeFullPath = ApplicationFileService.SourceCodePath(Settings.RepositoryFolderPath, firstLocation.Uri);
         }
         else
         {
-            SourceCodePath = "";
+            SourceCodeRelativePath = "";
+            SourceCodeFullPath = "";
         }
 
         CurrentIssue = issue;
@@ -247,5 +261,4 @@ public class MainWindowViewModel : ReactiveObject
 
     private static void ShowError(string message) =>
         MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
 }

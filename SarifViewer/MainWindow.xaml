@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:SarifViewer"
         xmlns:models="clr-namespace:SarifViewer.Models"
         xmlns:views="clr-namespace:SarifViewer.Views"
+        xmlns:converters="clr-namespace:SarifViewer.Converters"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         WindowState="Maximized"
@@ -15,6 +16,7 @@
     </Window.DataContext>
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:StringEmptynessToVisibilityConverter x:Key="StringEmptynessToVisibilityConverter" />
     </Window.Resources>
 
     <i:Interaction.Triggers>
@@ -70,7 +72,7 @@
                      Style="{StaticResource FilterTextBoxStyle}"
                      IsReadOnly="True"
                      Text="{Binding Settings.RepositoryFolderPath}" />
-            <Button Grid.Row="0" Grid.Column="2"
+            <Button Grid.Row="0" Grid.Column="2" Background="Beige"
                     Style="{StaticResource FilterButtonBoxStyle}"
                     Command="{Binding SelectRepositoryFolderCommand}">
                 <StackPanel Orientation="Horizontal">
@@ -173,30 +175,33 @@
                 </ListView>
             </Grid>
 
-            <Grid Grid.Column="1" Grid.Row="1">
+            <Grid Grid.Column="1" Grid.Row="1" Style="{StaticResource FilterPanelStyle}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" Margin="5,0,0,0">
+                <Grid Grid.Row="0" Margin="5,0,0,0"
+                      Visibility="{Binding SourceCodeRelativePath, Converter={StaticResource StringEmptynessToVisibilityConverter}}"
+                      d:Visibility="Visible">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0"
-                               Text="{Binding SourceCodePath}"
+                               Text="{Binding SourceCodeRelativePath}"
                                d:Text="sources\akka.net\src\contrib\cluster\Akka.Cluster.Metrics\ClusterMetricsStrategy.cs"
-                               VerticalAlignment="Center" />
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right"/>
 
                     <Button Grid.Column="1"
-                            Style="{StaticResource FilterButtonBoxStyle}"
+                            Style="{StaticResource FilterButtonBoxStyle}" Background="Beige"
                             Command="{Binding OpenFileInVisualStudioCommand}"
-                            CommandParameter="{Binding SourceCodePath}">
+                            CommandParameter="{Binding ElementName=IssueList, Path=SelectedItem}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock x:Name="OpenInVisualStudioButtonText"
-                                    Text="Open"
+                                    Text="Open in Visual Studio"
                                     VerticalAlignment="Center" />
                                 <Image Source="pack://application:,,,/SarifViewer;component/Resources/visual-studio-icon.png"
                                 Height="{Binding ElementName=OpenInVisualStudioButtonText, Path=ActualHeight, FallbackValue=16}"
@@ -208,7 +213,7 @@
                 <views:SourceCodeEditor x:Name="SourceCodeTextBox"
                                     Style="{StaticResource SourceCodeEditorStyle}"
                                     Grid.Row="1"
-                                    SourceCodePath="{Binding SourceCodePath}"
+                                    SourceCodePath="{Binding SourceCodeFullPath}"
                                     SelectedIssue="{Binding CurrentIssue}"/>
             </Grid>
 
