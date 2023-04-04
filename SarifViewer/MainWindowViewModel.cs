@@ -137,12 +137,22 @@ public class MainWindowViewModel : ReactiveObject
         }
     });
 
-    public ICommand OpenFileInVisualStudioCommand => ReactiveCommand.Create<Issue>(issue =>
+    public ICommand OpenFileInVisualStudioCommand => ReactiveCommand.CreateFromTask<Issue>(async issue =>
     {
-        if (issue != null && issue.Location?.FirstOrDefault() is { Uri: not null } firstLocation)
+        try
         {
-            string fullPath = SourceCodeFullPath = ApplicationFileService.SourceCodePath(Settings.RepositoryFolderPath, firstLocation.Uri);
-            SolutionFileHelper.OpenSourceCodeInVisualStudio(fullPath, firstLocation.Region.StartLine);
+            if (issue != null && issue.Location?.FirstOrDefault() is { Uri: not null } firstLocation)
+            {
+                IsLoading = true;
+                string fullPath = SourceCodeFullPath = ApplicationFileService.SourceCodePath(Settings.RepositoryFolderPath, firstLocation.Uri);
+                await Task.Run(() => SolutionFileHelper.OpenSourceCodeInVisualStudio(fullPath, firstLocation.Region.StartLine));
+                IsLoading = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            IsLoading = false;
+            ShowError("Failed to open file in Visual Studio." + Environment.NewLine + ex.Message);
         }
     });
 

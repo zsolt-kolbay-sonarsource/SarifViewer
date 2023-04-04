@@ -17,6 +17,7 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:StringEmptynessToVisibilityConverter x:Key="StringEmptynessToVisibilityConverter" />
+        <converters:InvertedBooleanConverter x:Key="InvertedBooleanConverter" />
     </Window.Resources>
 
     <i:Interaction.Triggers>
@@ -199,7 +200,7 @@
                             Style="{StaticResource FilterButtonBoxStyle}" Background="Beige"
                             Command="{Binding OpenFileInVisualStudioCommand}"
                             CommandParameter="{Binding ElementName=IssueList, Path=SelectedItem}">
-                            <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal">
                                 <TextBlock x:Name="OpenInVisualStudioButtonText"
                                     Text="Open in Visual Studio"
                                     VerticalAlignment="Center" />
