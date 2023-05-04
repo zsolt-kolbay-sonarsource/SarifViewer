@@ -30,6 +30,8 @@ public class MainWindowViewModel : ReactiveObject
         new ValueWithDisplayName<IssueState> { DisplayName = "New", Value = IssueState.New }
     };
 
+    #region Properties
+
     private string sourceCodeFullPath = "";
     public string SourceCodeFullPath
     {
@@ -114,6 +116,10 @@ public class MainWindowViewModel : ReactiveObject
         new ValueWithDisplayName<IssueLanguage> { DisplayName = "Only Visual Basic", Value = IssueLanguage.VisualBasic }
     };
 
+    #endregion
+
+    #region Commands
+
     public ICommand ApplicationLoadedCommand => ReactiveCommand.CreateFromTask(async () =>
     {
         Settings = await ApplicationFileService.LoadFromFileAsync(applicationSettingsFilePath);
@@ -145,7 +151,7 @@ public class MainWindowViewModel : ReactiveObject
             {
                 IsLoading = true;
                 string fullPath = SourceCodeFullPath = ApplicationFileService.SourceCodePath(Settings.RepositoryFolderPath, firstLocation.Uri);
-                await Task.Run(() => SolutionFileHelper.OpenSourceCodeInVisualStudio(fullPath, firstLocation.Region.StartLine));
+                await SolutionFileHelper.OpenSourceCodeInVisualStudio(fullPath, firstLocation.Region.StartLine);
                 IsLoading = false;
             }
         }
@@ -172,12 +178,14 @@ public class MainWindowViewModel : ReactiveObject
         CurrentIssue = issue;
     });
 
-    private readonly ObservableAsPropertyHelper<IEnumerable<Issue>> filteredIssues;
-    public IEnumerable<Issue> FilteredIssues => filteredIssues.Value;
+    #endregion
+
+    private readonly ObservableAsPropertyHelper<IEnumerable<Issue>> selectedFilteredIssues;
+    public IEnumerable<Issue> SelectedFilteredIssues => selectedFilteredIssues.Value;
 
     public MainWindowViewModel()
     {
-        filteredIssues = this
+        selectedFilteredIssues = this
             .WhenAnyValue(
                 x => x.Settings.Filter.IssueId,
                 x => x.Settings.Filter.SourceFilePath,
@@ -190,7 +198,7 @@ public class MainWindowViewModel : ReactiveObject
             .DistinctUntilChanged()
             .Select(x => FilterIssues(SelectIssueList()))
             .ObserveOn(RxApp.MainThreadScheduler)
-            .ToProperty(this, x => x.FilteredIssues);
+            .ToProperty(this, x => x.SelectedFilteredIssues);
     }
 
     private ObservableCollection<Issue> SelectIssueList() =>
@@ -205,7 +213,7 @@ public class MainWindowViewModel : ReactiveObject
 
     private IEnumerable<Issue> FilterIssues(IEnumerable<Issue> issues) =>
         issues.Where(x =>
-            (string.IsNullOrWhiteSpace(Settings.Filter.IssueId) || x.Id.Contains(Settings.Filter.IssueId, StringComparison.InvariantCultureIgnoreCase))
+            (GetIssueIdsFromFilter() is var issueIds && (issueIds.Length == 0 || issueIds.Any(id => x.Id.Contains(id, StringComparison.InvariantCultureIgnoreCase))))
          && (string.IsNullOrWhiteSpace(Settings.Filter.SourceFilePath) || (x.Location != null && x.Location.Any(loc => loc != null && loc.Uri.Contains(Settings.Filter.SourceFilePath, StringComparison.InvariantCultureIgnoreCase))))
          && (string.IsNullOrWhiteSpace(Settings.Filter.IssueMessage) || x.Message.Contains(Settings.Filter.IssueMessage, StringComparison.InvariantCultureIgnoreCase))
          && IsIssueUsingSelectedLanguage(x))
@@ -214,8 +222,22 @@ public class MainWindowViewModel : ReactiveObject
     private bool IsIssueUsingSelectedLanguage(Issue issue) =>
          Settings.Filter.IssueLanguage == IssueLanguage.CSharpAndVisualBasic
          || issue.Location == null
-         || (Settings.Filter.IssueLanguage == IssueLanguage.CSharp && issue.FirstLocationUri.EndsWith(".cs"))
-         || (Settings.Filter.IssueLanguage == IssueLanguage.VisualBasic && issue.FirstLocationUri.EndsWith(".vb"));
+         || (Settings.Filter.IssueLanguage == IssueLanguage.CSharp && issue.FirstLocationUri.EndsWith(".cs", StringComparison.InvariantCultureIgnoreCase))
+         || (Settings.Filter.IssueLanguage == IssueLanguage.VisualBasic && issue.FirstLocationUri.EndsWith(".vb", StringComparison.InvariantCultureIgnoreCase));
+
+    private string[] GetIssueIdsFromFilter()
+    {
+        if (string.IsNullOrWhiteSpace(Settings.Filter.IssueId))
+        {
+            return Array.Empty<string>();
+        }
+
+        return Settings.Filter.IssueId
+                .Split(',')
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToArray();
+    }
 
     private async Task LoadAllIssues(string repositoryPath)
     {

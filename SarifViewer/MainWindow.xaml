@@ -88,7 +88,7 @@
 
             <TextBlock Grid.Row="1" Grid.Column="0"
                        Style="{StaticResource StaticLabelStyle}"
-                       Text="Rule ID:" />
+                       Text="Rule ID(s):" />
             <TextBox Grid.Row="1" Grid.Column="1"
                      Style="{StaticResource FilterTextBoxStyle}"
                      Text="{Binding Settings.Filter.IssueId, UpdateSourceTrigger=PropertyChanged}"/>
@@ -142,7 +142,7 @@
             <Grid Grid.Column="0" Grid.Row="1" Background="AliceBlue">
                 <ListView x:Name="IssueList"
                           Style="{StaticResource IssueListViewStyle}"
-                          ItemsSource="{Binding FilteredIssues}">
+                          ItemsSource="{Binding SelectedFilteredIssues}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
                             <i:InvokeCommandAction Command="{Binding SelectedIssueCommand}"
@@ -191,9 +191,11 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0"
+                               Margin="25,0,0,0"
                                Text="{Binding SourceCodeRelativePath}"
                                d:Text="sources\akka.net\src\contrib\cluster\Akka.Cluster.Metrics\ClusterMetricsStrategy.cs"
                                VerticalAlignment="Center"
+                               TextAlignment="Justify"
                                HorizontalAlignment="Right"/>
 
                     <Button Grid.Column="1"

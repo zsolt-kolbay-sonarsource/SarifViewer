@@ -5,12 +5,13 @@ using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.OLE.Interop;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SarifViewer.Utilities;
 
 public static class SolutionFileHelper
 {
-    public static void OpenSourceCodeInVisualStudio(string sourceFilePath, int lineNumber)
+    public static async Task OpenSourceCodeInVisualStudio(string sourceFilePath, int lineNumber)
     {
         if (string.IsNullOrEmpty(sourceFilePath))
         {
@@ -42,9 +43,31 @@ public static class SolutionFileHelper
             dte.MainWindow.Visible = true;
             dte.UserControl = true;
             dte.Solution.Open(solutionPath);
+
+            while (!dte.Solution.IsOpen)
+            {
+                await Task.Delay(100);
+            }
         }
 
         var window = dte.ItemOperations.OpenFile(sourceFilePath);
+
+        bool sourceFileLoaded = false;
+        string sourceFileFullPath = Path.GetFullPath(sourceFilePath);
+
+        while (!sourceFileLoaded)
+        {
+            foreach (Window wnd in dte.Windows)
+            {
+                if (wnd.Document != null && string.Equals(Path.GetFullPath(wnd.Document.FullName), sourceFileFullPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    sourceFileLoaded = true;
+                    break;
+                }
+            }
+            await Task.Delay(100);
+        }
+
         window.Activate();
         TextSelection selection = (TextSelection)dte.ActiveDocument.Selection;
         selection.GotoLine(lineNumber, true);
